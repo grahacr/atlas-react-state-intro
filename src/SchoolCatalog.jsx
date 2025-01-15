@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 
+const PAGE_SIZE = 5;
+
 export default function SchoolCatalog() {
   const [courseData, setCourseData] = useState([]);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('');
   const [direction, setDirection] = useState('asc');
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     fetch("/api/courses.json")
@@ -22,12 +25,6 @@ export default function SchoolCatalog() {
   course.courseName.toLowerCase().includes(search.toLowerCase())
   );
 
-  const sortDataHandler = (field) => {
-    const sortOrder = sort === field && direction === 'asc' ? "desc" : "asc";
-    setSort(field);
-    setDirection(sortOrder);
-  };
-
   const sortedCourses = [...filteredCourses].sort((a, b) => {
     if (sort) {
       const aValue = a[sort];
@@ -40,6 +37,17 @@ export default function SchoolCatalog() {
     }
     return 0;
   });
+
+  const currentPageCourses = sortedCourses.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const hasMore = sortedCourses.length > page * PAGE_SIZE;
+  const hasLess = page > 1;
+
+  const sortDataHandler = (field) => {
+    const sortOrder = sort === field && direction === 'asc' ? "desc" : "asc";
+    setSort(field);
+    setDirection(sortOrder);
+  };
+
 
   return (
     <div className="school-catalog">
@@ -58,7 +66,7 @@ export default function SchoolCatalog() {
           </tr>
         </thead>
         <tbody>
-          {sortedCourses.map((course, index) => (
+          {currentPageCourses.map((course, index) => (
           <tr key={index}>
             <td>{course.trimester}</td>
             <td>{course.courseNumber}</td>
@@ -73,8 +81,8 @@ export default function SchoolCatalog() {
         </tbody>
       </table>
       <div className="pagination">
-        <button>Previous</button>
-        <button>Next</button>
+        <button disabled={!hasLess} onClick={() => setPage(page - 1)}>Previous</button>
+        <button disabled={!hasMore} onClick={() => setPage(page + 1)}>Next</button>
       </div>
     </div>
   );
