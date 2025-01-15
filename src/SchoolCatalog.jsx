@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 export default function SchoolCatalog() {
   const [courseData, setCourseData] = useState([]);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     fetch("/api/courses.json")
@@ -14,10 +15,16 @@ export default function SchoolCatalog() {
       });
   }, []);
 
+  const filteredCourses = courseData.filter((course) =>
+    course.courseNumber.toLowerCase().includes(search.toLowerCase()) ||
+  course.courseName.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="school-catalog">
       <h1>School Catalog</h1>
-      <input type="text" placeholder="Search" />
+      <input type="text" placeholder="Search" value={search}
+      onChange={(e) => setSearch(e.target.value)} />
       <table>
         <thead>
           <tr>
@@ -30,7 +37,7 @@ export default function SchoolCatalog() {
           </tr>
         </thead>
         <tbody>
-          {courseData.map((course, index) => (
+          {filteredCourses.map((course, index) => (
           <tr key={index}>
             <td>{course.trimester}</td>
             <td>{course.courseNumber}</td>
