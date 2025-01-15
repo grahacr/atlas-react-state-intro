@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 export default function SchoolCatalog() {
   const [courseData, setCourseData] = useState([]);
   const [search, setSearch] = useState('');
+  const [sort, setSort] = useState('');
+  const [direction, setDirection] = useState('asc');
 
   useEffect(() => {
     fetch("/api/courses.json")
@@ -20,6 +22,25 @@ export default function SchoolCatalog() {
   course.courseName.toLowerCase().includes(search.toLowerCase())
   );
 
+  const sortDataHandler = (field) => {
+    const sortOrder = sort === field && direction === 'asc' ? "desc" : "asc";
+    setSort(field);
+    setDirection(sortOrder);
+  };
+
+  const sortedCourses = [...filteredCourses].sort((a, b) => {
+    if (sort) {
+      const aValue = a[sort];
+      const bValue = b[sort];
+      if (direction === 'asc') {
+        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      } else {
+        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+      }
+    }
+    return 0;
+  });
+
   return (
     <div className="school-catalog">
       <h1>School Catalog</h1>
@@ -28,16 +49,16 @@ export default function SchoolCatalog() {
       <table>
         <thead>
           <tr>
-            <th>Trimester</th>
-            <th>Course Number</th>
-            <th>Courses Name</th>
-            <th>Semester Credits</th>
-            <th>Total Clock Hours</th>
+            <th onClick={() => sortDataHandler('trimester')}>Trimester</th>
+            <th onClick={() => sortDataHandler('courseNumber')}>Course Number</th>
+            <th onClick={() => sortDataHandler('courseName')}>Courses Name</th>
+            <th onClick={() => sortDataHandler('semesterCredits')}>Semester Credits</th>
+            <th onClick={() => sortDataHandler('totalClockHours')}>Total Clock Hours</th>
             <th>Enroll</th>
           </tr>
         </thead>
         <tbody>
-          {filteredCourses.map((course, index) => (
+          {sortedCourses.map((course, index) => (
           <tr key={index}>
             <td>{course.trimester}</td>
             <td>{course.courseNumber}</td>
