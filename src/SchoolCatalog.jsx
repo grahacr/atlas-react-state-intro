@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useEnroll } from "./enrollContext";
 
 const PAGE_SIZE = 5;
 
@@ -8,6 +9,7 @@ export default function SchoolCatalog() {
   const [sort, setSort] = useState('');
   const [direction, setDirection] = useState('asc');
   const [page, setPage] = useState(1);
+  const { enrollCourse } = useEnroll();
 
   useEffect(() => {
     fetch("/api/courses.json")
@@ -74,7 +76,7 @@ export default function SchoolCatalog() {
             <td>{course.semesterCredits}</td>
             <td>{course.totalClockHours}</td>
             <td>
-              <button>Enroll</button>
+              <button onClick={() => enrollCourse(course)}>Enroll</button>
             </td>
           </tr>
           ))}
